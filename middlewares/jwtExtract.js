@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     if(token){
         jwt.verify(token, process.env.SECRET, async (err, decoded) => {
             if(err){
-                common.LogError("jwtAuth",err,null,req.ip,req.device.type,req.device.name);
+                common.LogError(err,req);
                 req.validJwt = false;
                 next();
             }

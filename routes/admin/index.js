@@ -4,7 +4,7 @@ const adminAuth = require('../../middlewares/adminAuth');
 const User = require('../../models/User').User;
 const ErrorLog = require('../../models/ErrorLog').ErrorLog;
 const ActivityLog = require('../../models/ActivityLog').ActivityLog;
-const common = require('../../config/common');
+const {LogError} = require('../../config/common');
 const moment = require('moment');
 
 /* GET home page. */
@@ -46,7 +46,7 @@ router.get('/', adminAuth, async (req, res) => {
 		);
 	}
 	catch (error) {
-		common.LogError("500 GET /", error, req.user._id, req.ip,req.device.type,req.device.name);
+		LogError(error,req);
 		return res.render('error500');
 	}
 

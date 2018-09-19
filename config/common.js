@@ -8,7 +8,6 @@ const nodemailer = require('nodemailer');
  * Function to send emails
  * 
  * @param {Object} emailArgs Object contains the following: "to", "subject", "html"
- * @param {function} callback The function the run after sending the email
  */
 exports.SendEmail = async (emailArgs) => {
     var transport = nodemailer.createTransport({
@@ -25,6 +24,7 @@ exports.SendEmail = async (emailArgs) => {
             LogEmail(emailArgs.to, emailArgs.subject, emailArgs.html)
         ];
         await Promise.all(promises);
+        return true;
     }
     catch (error) {
         throw new Error(error);
@@ -33,7 +33,7 @@ exports.SendEmail = async (emailArgs) => {
 // =======================================================================|
 // ============================ EMAIL EXAMPLE ============================|
 // =======================================================================|
-// const common = require("path_to_common.js");
+// const {SendEmail} = require("path_to_common.js");
 // let emailArgs = {
 //     to: "someone@email.com",
 //     subject: "Important subject line",
@@ -42,9 +42,7 @@ exports.SendEmail = async (emailArgs) => {
 //         <p>I can send emails that contain html</p>
 //     `
 // }
-// common.SendEmail(emailArgs, (error) => {
-//     ...code to run after email is sent
-// })
+// await SendEmail(emailArgs);
 // =======================================================================|
 // ============================ EMAIL EXAMPLE ============================|
 // =======================================================================|
@@ -78,24 +76,20 @@ const LogEmail = async (to, subject, content) => {
  * Generic function to log errors into the database with relevant data.
  * Returns a Promise.
  * 
- * @param {string} category The cateogry of the error e.g. Login , Email , Message , etc...
- * @param {string} error The error message
- * @param {ObjectId} userId The id of the user that the error occurred for
- * @param {string} ip The ip address of the user that the error occured for
- * @param {string} deviceType The device type
- * @param {string} deviceName The device name
+ * @param {string} error The error
+ * @param {string} req The express request object
  */
-exports.LogError = async (category, error, userId, ip, deviceType, deviceName) => {
+exports.LogError = async (error, req) => {
 
     try {
         let _errorLog = new ErrorLog();
         _errorLog.created = new Date();
-        _errorLog.category = category;
+        _errorLog.category = `'${req.method}' | ${req.originalUrl}`;
         _errorLog.error = error;
-        _errorLog.user = userId;
-        _errorLog.ip = ip;
-        _errorLog.deviceType = deviceType;
-        _errorLog.deviceName = deviceName;
+        _errorLog.user = req.user._id;
+        _errorLog.ip = req.ip;
+        _errorLog.deviceType = req.device.type;
+        _errorLog.deviceName = req.device.name;
         let errorLog = await _errorLog.save();
         return errorLog;
     }
@@ -111,7 +105,6 @@ exports.LogError = async (category, error, userId, ip, deviceType, deviceName) =
  * Returns a Promise.
  * 
  * @param {string} activity The activity name
- * @param {string} content Any information relating to the activity that has taken place
  * @param {ObjectId} userId The users objectId that has performed the activity
  * @param {string} ip The ip address of the user. Accessed through req.ip
  * @param {string} deviceType The device type
@@ -119,7 +112,7 @@ exports.LogError = async (category, error, userId, ip, deviceType, deviceName) =
  * @param {Number} latitude Point of latitude for the activity
  * @param {Number} longitude Point of longitude for the activity
  */
-exports.LogActivity = async (activity, content, userId, ip, deviceType, deviceName, latitude=null, longitude=null) => {
+exports.LogActivity = async (activity,content,userId,req) => {
 
     try {
         let _activityLog = new ActivityLog();
@@ -127,11 +120,11 @@ exports.LogActivity = async (activity, content, userId, ip, deviceType, deviceNa
         _activityLog.activity = activity;
         _activityLog.content = content;
         _activityLog.user = userId;
-        _activityLog.ip = ip;
-        _activityLog.deviceType = deviceType;
-        _activityLog.deviceName = deviceName;
-        _activityLog.latitude = latitude;
-        _activityLog.longitude = longitude;
+        _activityLog.ip = req.ip;
+        _activityLog.deviceType = (req.device && req.device.type);
+        _activityLog.deviceName = (req.device && req.device.name);
+        _activityLog.latitude = (req.location && req.location.latitude);
+        _activityLog.longitude = (req.location && req.location.longitude);
         let activityLog = await _activityLog.save();
         return activityLog;
     }
@@ -147,36 +140,62 @@ exports.LogActivity = async (activity, content, userId, ip, deviceType, deviceNa
  * @param {Object} image The file object that lives on the request object e.g. req.files
  * @param {string} userId The id of the user that is uploading the image
  */
-exports.UploadImage = (image, userId) => {
+exports.UploadImage = async (image, userId) => {
 
-    return new Promise((resolve,reject) => {
-        
-        let findFileExt = /(?:\.([^.]+))?$/; //gets the file extension
-        let ext = findFileExt.exec(image.name)[1];
-        let timestamp = new Date().getTime();
-        let guid = exports.guid(false);
-    
-        if (ext === undefined) {
-            reject("Attempted to upload the image, but there was no extension.");
-        }
-        else {
-            let imagePath = 'public/uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
-            let retrievePath = process.env.apiUrl + 'uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
-            image.mv(imagePath, (err) => {
-    
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(retrievePath);
-                }
-    
-            });
-        }
+    let findFileExt = /(?:\.([^.]+))?$/; //gets the file extension
+    let ext = findFileExt.exec(image.name)[1];
+    let timestamp = new Date().getTime();
+    let guid = exports.guid(false);
 
-    });
+    if (ext === undefined) {
+        throw new Error("Attempted to upload the image, but there was no extension.");
+    }
+    else {
+        let imagePath = 'public/uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
+        let retrievePath = process.env.apiUrl + 'uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
+        image.mv(imagePath, (err) => {
+
+            if (err) {
+                throw new Error(err);
+            }
+            else {
+                return retrievePath;
+            }
+
+        });
+    }
 
 }
+// exports.UploadImage = (image, userId) => {
+
+//     return new Promise((resolve,reject) => {
+        
+//         let findFileExt = /(?:\.([^.]+))?$/; //gets the file extension
+//         let ext = findFileExt.exec(image.name)[1];
+//         let timestamp = new Date().getTime();
+//         let guid = exports.guid(false);
+    
+//         if (ext === undefined) {
+//             reject("Attempted to upload the image, but there was no extension.");
+//         }
+//         else {
+//             let imagePath = 'public/uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
+//             let retrievePath = process.env.apiUrl + 'uploads/' + userId + '_' + guid + '_' + timestamp + '.' + ext;
+//             image.mv(imagePath, (err) => {
+    
+//                 if (err) {
+//                     reject(err);
+//                 }
+//                 else {
+//                     resolve(retrievePath);
+//                 }
+    
+//             });
+//         }
+
+//     });
+
+// }
 
 
 /**

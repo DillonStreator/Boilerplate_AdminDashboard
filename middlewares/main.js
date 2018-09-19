@@ -1,4 +1,4 @@
-const LogActivity = require('../config/common').LogActivity;
+const {LogActivity} = require('../config/common');
 const LogError = require('../config/common').LogError;
 
 /**
@@ -50,17 +50,18 @@ module.exports = async (req,res,next)=>{
 			let user = await _user.save();
 		}
 		catch (error) {
-			LogError(`500 ${req.url} update user middlewares`,error,userId,req.ip,req.device.type,req.device.name);
+			LogError(error,req);
 			return res.render('error500');
 		}
 		
 	}
+
+	req.location = location;
 	
 	//Don't care to log access if the user is an Admin or SuperAdmin. Only log access if the request is from a regular user
 	if (req.user && req.user.role !== 'Admin' && req.user.role !== 'SuperAdmin') {
-		LogActivity("Access",req.url,userId,req.ip,req.device.type,req.device.name,latitude,longitude);
+		LogActivity("Access",req.url,userId,req);
 	}
-	req.location = location;
 
 	next();
 };

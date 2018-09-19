@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../../../models/User').User;
-const LogError = require('../../../config/common').LogError;
-const common = require('../../../config/common');
+const {LogError,LogActivity,errorMessages} = require('../../../config/common');
 
 module.exports = async (req, res) => {
 
@@ -14,6 +13,9 @@ module.exports = async (req, res) => {
 
     try {
         let _user = await User.find({email});
+        if (!_user) {
+            return res.json({success:false,message:"Incorrect email or password."});
+        }
 
         let passwordConfirmed = await bcrypt.compare(password,_user.password);
         if (!passwordConfirmed) {
@@ -24,13 +26,14 @@ module.exports = async (req, res) => {
 
         _user.jwt = token;
         let user = await _user.save();
-        
+
+        LogActivity("Login",`User ${email} logged in`,_user._id,req);
         return res.json({success:true,content:token});
 
     }
     catch (error) {
-        LogError("500 /enduser/api/login",error,null,req.ip,req.device.type,req.device.name);
-        return res.json({success:false,message:common.errorMessages.generic500});
+        LogError(error,req);
+        return res.json({success:false,message:errorMessages.generic500});
     }
 
 }

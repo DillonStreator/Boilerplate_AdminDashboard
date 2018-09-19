@@ -37,7 +37,7 @@ router.get('/:id', adminAuth, async (req, res) => {
 		);
 	}
 	catch (error) {
-		common.LogError("500 User show", error, req.user._id, req.ip, req.device.type, req.device.name);
+		common.LogError(error,req);
 		res.render('error500');
 	}
 
@@ -70,14 +70,14 @@ router.post('/', adminAuth, async (req, res) => {
 		_user.ips = [];
 		_user.lastSeen = null;
 		_user.location = {
-			latitude: parseFloat(req.body.latitude) || null,
-			longitude: parseFloat(req.body.longitude) || null
+			latitude: (req.location && req.location.latitude),
+			longitude: (req.location && req.location.longitude)
 		}
 
 		let user = await _user.save();
 
 		let activityContent = "User " + req.user.email + " created a new user " + user.email;
-		common.LogActivity("Create User", activityContent, req.user._id, req.ip, req.device.type, req.device.name);
+		common.LogActivity("Create User", activityContent, req.user._id, req);
 
 		let email = {
 			to: user.email,
@@ -94,7 +94,7 @@ router.post('/', adminAuth, async (req, res) => {
 
 	}
 	catch (error) {
-		common.LogError("Create User", error, req.user._id, req.ip, req.device.type, req.device.name);
+		common.LogError(error,req);
 
 		req.flash('errorMessages', common.errorMessages.generic500);
 		return res.redirect('/admin/users');
@@ -112,11 +112,12 @@ router.delete('/:_id', adminAuth, permission(['SuperAdmin']), async (req, res) =
 		await User.deleteOne({ _id });
 
 		let activityContent = "User " + req.user.email + " deleted the user by id:" + _id;
-		await common.LogActivity("Delete User", activityContent, req.user._id, req.ip, req.device.type, req.device.name);
+		common.LogActivity("Delete User", activityContent, req.user._id, req);
+
 		return res.json({ success: true, message: "Successfully deleted user!" });
 	}
 	catch (error) {
-		common.LogError('API DELETE /users', error, req.user._id, req.ip, req.device.type, req.device.name);
+		common.LogError(error,req);
 		return res.json({ success: false, message: common.errorMessages.generic500 });
 	}
 
