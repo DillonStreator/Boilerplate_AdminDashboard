@@ -17,6 +17,10 @@ module.exports = async (req, res) => {
             return res.json({success:false,message:"Incorrect email or password."});
         }
 
+        if (_user.status == 'blocked') {
+            return res.json({success:false,message:"You've been blocked. Please contact support."});
+        }
+
         let passwordConfirmed = await bcrypt.compare(password,_user.password);
         if (!passwordConfirmed) {
             return res.json({success:false,message:"Incorrect email or password."});

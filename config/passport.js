@@ -81,6 +81,10 @@ module.exports = function(passport) {
                 req.flash('errorMessages', 'Incorrect email or password.');
                 return done(null, false);
             }
+            if (foundUser.status == 'blocked') {
+                req.flash('errorMessages', "You've been blocked. Please contact support.");
+                return done(null, false);
+            }
             let confirmedPassword = await bcrypt.compare(password, foundUser.password);
             if (!confirmedPassword) {
                 req.flash('errorMessages', 'Incorrect email or password.');
