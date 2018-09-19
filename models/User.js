@@ -4,26 +4,23 @@ var UserSchema = mongoose.Schema({
 
     email: String,
     password: String,
-    role: String,
+    role: {type: String, default: 'enduser'},
     // profile: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile' },
     jwt: String,
-    created: Date,
+    created: {type: Date, default: new Date()},
     lastSeen: Date,
-    status: String,
+    status: {type: String, default: 'active'},
+
+    // Keep track of number of logins per ip address.. potential use case is keeping track of home/work machines
     ips: [{
         ip: String,
         accessCount: Number
     }],
+
     location: {
         latitude: Number,
         longitude: Number
     }
-    // ips: [{ type: String, unique: true }]
-    // {
-    //     ip: String,
-    //     count: Number
-    // }
-    // Keep track of number of logins per ip address.. potential use case is keeping track of home/work machines
 
 })
 

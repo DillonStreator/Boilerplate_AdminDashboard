@@ -1,7 +1,7 @@
 var LocalStrategy   = require('passport-local').Strategy;
 var bcrypt = require('bcrypt');
 var User = require('../models/User').User;
-var common = require('./common');
+var {LogError} = require('./common');
 
 // expose this function to our app using module.exports
 module.exports = function(passport) {
@@ -55,6 +55,7 @@ module.exports = function(passport) {
             return done(null, user);
         }
         catch (error) {
+            LogError(error,req);
             return done(error, null);
         }
         
@@ -73,8 +74,7 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass back the entire request to the callback
     },
     async (req, email, password, done) => { // callback with email and password from our form
-        console.log(email);
-        console.log(password);
+
         try {
             let foundUser = await User.findOne({email});
             if (!foundUser) {
@@ -87,13 +87,11 @@ module.exports = function(passport) {
                 return done(null, false);
             }
 
-            await common.LogActivity("Login","User has successfully logged in.",foundUser._id,req.ip,req.device.type,req.device.name);
-
             req.flash('successMessages', 'Successfully logged in!');
             return done(null, foundUser);
         }
         catch (error) {
-            await common.LogError("Login",error,null,req.ip,req.device.type,req.device.name);
+            LogError(error,req);
             return done(error);
         }
 

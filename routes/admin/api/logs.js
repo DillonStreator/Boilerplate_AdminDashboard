@@ -4,7 +4,7 @@ const ErrorLog = require('../../../models/ErrorLog').ErrorLog;
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../../middlewares/adminAuth');
-const common = require('../../../config/common');
+const {LogError,errorMessages} = require('../../../config/common');
 const moment = require('moment');
 
 /* GET all logs */
@@ -16,8 +16,8 @@ router.get('/activity', adminAuth, async (req, res) => {
 		return res.json({success:true,data:logs});
 	}
 	catch (error) {
-		common.LogError('500 API GET /logs/activity',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 	
 });
@@ -70,8 +70,8 @@ router.post('/activity/filter', adminAuth, async (req, res) => {
 
 	}
 	catch (error) {
-		common.LogError('API POST /activity/filter',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 
 });
@@ -83,8 +83,8 @@ router.get('/email', adminAuth, async (req, res) => {
 		return res.json({success:true,data:logs});
 	}
 	catch (error) {
-		common.LogError('500 API GET /logs/email',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 	
 });
@@ -96,8 +96,8 @@ router.get('/error', adminAuth, async (req, res) => {
 		return res.json({success:true,data:logs});
 	}
 	catch (error) {
-		common.LogError('500 API GET /logs/error',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 	
 });
@@ -123,8 +123,8 @@ router.get('/devices', adminAuth, async (req, res) => {
 		return res.json(devices);
 	}
 	catch (error) {
-		common.LogError('500 API GET /logs/devices',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 
 });
@@ -161,8 +161,8 @@ router.get('/heatmap', adminAuth, async (req, res) => {
 		return res.json({success:true,content:accessActivity});
 	}
 	catch (error) {
-		common.LogError('500 API GET /logs/heatmap',error,req.user._id,req.ip,req.device.type,req.device.name);
-		return res.json({success:false,message:common.errorMessages.generic500});
+		LogError(error,req);
+		return res.json({success:false,message:errorMessages.generic500});
 	}
 	
 });

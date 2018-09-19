@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../../middlewares/adminAuth');
-const User = require('../../../models/User').User;
 const Note = require('../../../models/Note').Note;
-const common = require('../../../config/common');
+const {LogError,errorMessages} = require('../../../config/common');
 
 router.post('/', adminAuth, async (req, res) => {
     let to = req.body.to;
@@ -30,8 +29,8 @@ router.post('/', adminAuth, async (req, res) => {
         return res.json(data);
     }
     catch (error) {
-        common.LogError("POST /admin/api/notes",error,req.user._id,req.ip,req.device.type,req.device.name);
-        return res.json({success:false,message:common.errorMessages.generic500});
+        LogError(error,req);
+        return res.json({success:false,message:errorMessages.generic500});
     }
 
 });
@@ -58,8 +57,8 @@ router.post('/:id/note', adminAuth, async (req, res) => {
         return res.json({success:true,message:"Successfully added new note"});
     }
     catch (error) {
-        common.LogError("POST /admin/api/notes/:id/note",error,req.user._id,req.ip,req.device.type,req.device.name);
-        return res.json({success:false,message:common.errorMessages.generic500});
+        LogError(error,req);
+        return res.json({success:false,message:errorMessages.generic500});
     }
     
 })
