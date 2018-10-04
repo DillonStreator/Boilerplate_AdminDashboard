@@ -1,11 +1,13 @@
+const {
+	User,
+	Note
+} = require('../../models');
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../middlewares/adminAuth');
 const common = require('../../config/common');
 const permission = require('permission');
 const bcrypt = require('bcrypt');
-const User = require('../../models/User').User;
-const Note = require('../../models/Note').Note;
 const moment = require('moment');
 
 /* GET users listing. */
