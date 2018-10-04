@@ -1,10 +1,12 @@
+const {
+	ActivityLog,
+	ErrorLog,
+	User
+} = require('../../models');
+const {LogError} = require('../../config/common');
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../middlewares/adminAuth');
-const User = require('../../models/User').User;
-const ErrorLog = require('../../models/ErrorLog').ErrorLog;
-const ActivityLog = require('../../models/ActivityLog').ActivityLog;
-const {LogError} = require('../../config/common');
 const moment = require('moment');
 
 /* GET home page. */

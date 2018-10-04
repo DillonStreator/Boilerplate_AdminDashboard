@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../../middlewares/adminAuth');
-const Note = require('../../../models/Note').Note;
+const {Note} = require('../../../models');
 const {LogError,errorMessages} = require('../../../config/common');
 
 router.post('/', adminAuth, async (req, res) => {

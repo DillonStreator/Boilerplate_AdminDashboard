@@ -1,10 +1,15 @@
-const ActivityLog = require('../../../models/ActivityLog').ActivityLog;
-const EmailLog = require('../../../models/EmailLog').EmailLog;
-const ErrorLog = require('../../../models/ErrorLog').ErrorLog;
+const {
+	ActivityLog,
+	EmailLog,
+	ErrorLog
+} = require('../../../models');
+const {
+	LogError,
+	errorMessages
+} = require('../../../config/common');
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../../../middlewares/adminAuth');
-const {LogError,errorMessages} = require('../../../config/common');
 const moment = require('moment');
 
 /* GET all logs */
