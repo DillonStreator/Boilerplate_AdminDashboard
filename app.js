@@ -157,10 +157,8 @@ app.use('/admin/api/notes', apiNotesRouter);
 
 
 const jwtAuth = require('./middlewares/jwtAuth');
-const Login = require('./routes/endusers/api/login');
-const Logout = require('./routes/endusers/api/logout');
-app.get('/login', Login);
-app.get('/logout', jwtAuth, Logout);
+const authRouter = require('./routes/endusers/api/auth');
+app.use('/auth', authRouter);
 
 
 // ====================== Routers =========================
