@@ -1,9 +1,8 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const {User} = require('../../../models');
-const {LogError,LogActivity,errorMessages} = require('../../../config/common');
+const express = require('express');
+const router = express.Router();
+const {LogActivity} = require('../../../config/common');
 
-module.exports = async (req, res) => {
+router.get('/login', async (req, res) => {
 
     let {email, password} = req.body;
 
@@ -26,12 +25,9 @@ module.exports = async (req, res) => {
             return res.json({success:false,message:"Incorrect email or password."});
         }
 
-        let token = jwt.sign({_id:_user._id},process.env.SECRET);
+        let token = jwt.sign(JSON.stringify({_id:_user._id}),process.env.SECRET);
 
-        _user.jwt = token;
-        let user = await _user.save();
-
-        LogActivity("Login",`User ${email} logged in`,_user._id,req);
+        LogActivity("Login", req);
         return res.json({success:true,content:token});
 
     }
@@ -39,5 +35,13 @@ module.exports = async (req, res) => {
         LogError(error,req);
         return res.json({success:false,message:errorMessages.generic500});
     }
+});
 
-}
+
+router.get('/logout', (req, res) => {
+    LogActivity("Logout", req);
+    return res.json({success:true});
+});
+
+
+module.exports = router;

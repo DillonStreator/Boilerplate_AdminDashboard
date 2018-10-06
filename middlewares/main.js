@@ -60,7 +60,7 @@ module.exports = async (req,res,next)=>{
 	
 	//Don't care to log access if the user is an Admin or SuperAdmin. Only log access if the request is from a regular user
 	if (req.user && req.user.role !== 'Admin' && req.user.role !== 'SuperAdmin') {
-		LogActivity("Access",req.url,userId,req);
+		LogActivity("Access",req);
 	}
 
 	next();

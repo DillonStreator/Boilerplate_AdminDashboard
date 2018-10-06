@@ -78,8 +78,7 @@ router.post('/', adminAuth, async (req, res) => {
 
 		let user = await _user.save();
 
-		let activityContent = "User " + req.user.email + " created a new user " + user.email;
-		common.LogActivity("Create User", activityContent, req.user._id, req);
+		common.LogActivity("Create User", req);
 
 		let email = {
 			to: user.email,
@@ -113,8 +112,7 @@ router.delete('/:_id', adminAuth, permission(['SuperAdmin']), async (req, res) =
 		let _id = req.params._id;
 		await User.deleteOne({ _id });
 
-		let activityContent = "User " + req.user.email + " deleted the user by id:" + _id;
-		common.LogActivity("Delete User", activityContent, req.user._id, req);
+		common.LogActivity("Delete User", req);
 
 		return res.json({ success: true, message: "Successfully deleted user!" });
 	}

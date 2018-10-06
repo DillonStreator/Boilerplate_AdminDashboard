@@ -39,7 +39,7 @@ var async = require('async');
 //         _user.password = await bcrypt.hash('test',5);
 //         _user.created = new Date();
 //         let user = await _user.save();
-//         await common.LogActivity("Create user","User was created during seeding!",user._id,null);
+//         await common.LogActivity("Create user",null);
 //         done();
 //     }
 //     catch (error) {

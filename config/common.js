@@ -77,19 +77,19 @@ const LogEmail = async (to, subject, content) => {
  * Returns a Promise.
  * 
  * @param {string} error The error
- * @param {string} req The express request object
+ * @param {object} req The express request object
  */
-exports.LogError = async (error, req) => {
+exports.LogError = async (error, req={}) => {
 
     try {
         let _errorLog = new ErrorLog();
         _errorLog.created = new Date();
         _errorLog.category = `'${req.method}' | ${req.originalUrl}`;
         _errorLog.error = error;
-        _errorLog.user = req.user._id;
+        _errorLog.user = (req.user ? req.user._id : null);
         _errorLog.ip = req.ip;
-        _errorLog.deviceType = req.device.type;
-        _errorLog.deviceName = req.device.name;
+        _errorLog.deviceType = (req.device ? req.device.type : null);
+        _errorLog.deviceName = (req.device ? req.device.name : null);
         let errorLog = await _errorLog.save();
         return errorLog;
     }
@@ -101,25 +101,19 @@ exports.LogError = async (error, req) => {
 
 
 /**
- * Generic function for creating a new entry in the activity log.
+ *Generic function for creating a new entry in the activity log.
  * Returns a Promise.
- * 
- * @param {string} activity The activity name
- * @param {ObjectId} userId The users objectId that has performed the activity
- * @param {string} ip The ip address of the user. Accessed through req.ip
- * @param {string} deviceType The device type
- * @param {string} deviceName The device name
- * @param {Number} latitude Point of latitude for the activity
- * @param {Number} longitude Point of longitude for the activity
+ * @param {string} activity 
+ * @param {object} req 
  */
-exports.LogActivity = async (activity,content,userId,req) => {
+exports.LogActivity = async (activity,req={}) => {
 
     try {
         let _activityLog = new ActivityLog();
         _activityLog.created = new Date();
         _activityLog.activity = activity;
-        _activityLog.content = content;
-        _activityLog.user = userId;
+        _activityLog.content = `'${req.method}' | ${req.originalUrl}`;
+        _activityLog.user = (req.user ? req.user._id : null);
         _activityLog.ip = req.ip;
         _activityLog.deviceType = (req.device && req.device.type);
         _activityLog.deviceName = (req.device && req.device.name);
